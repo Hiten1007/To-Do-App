@@ -33,7 +33,6 @@ export const initial_page = (() => {
       
         sideBar.appendChild(upperBox);
 
-        // Create and append projectBox after it has been created
         const projectBox = createProjectBox();
         sideBar.appendChild(projectBox);
     
@@ -44,7 +43,7 @@ export const initial_page = (() => {
         const projectBox = document.createElement("div");
         projectBox.setAttribute("id", "projectBox");
 
-        console.log("Project Box Created:", projectBox); // Check if it's being created
+        console.log("Project Box Created:", projectBox); 
 
         projectBox.appendChild(createHeader("Projects", "h2"));
 
