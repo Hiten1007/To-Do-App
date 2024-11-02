@@ -1,6 +1,7 @@
 import { todoapp } from "./todo.js";
 import { Project } from "./projects.js";
 import { time } from "./time.js";
+import { secondsInHour } from "date-fns/constants";
 
 export const initial_page = (() => {
     function createDisplay() {
@@ -21,7 +22,7 @@ export const initial_page = (() => {
         
         ["All Tasks", "Today", "Next 7 Days"].forEach(projectName => {
             Project.createProject(projectName, "defaults");
-            
+            secondsInHour
         });
     }
 
