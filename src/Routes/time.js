@@ -7,13 +7,13 @@ export const time = (() => {
     }
 
     function getTodayTasks() {
-        const allTasks = Project.getProjects().get("AllTasks");
+        const allTasks = JSON.parse(localStorage.getItem("All Tasks"));
         const today = formatTime(new Date());
-        return allTasks.filter(todo => todo.date === today);
+        return allTasks !== null ? allTasks.filter(todo => todo.date === today) : null;
     }
 
     function getNext7Days() {
-        const allTasks = Project.getProjects().get("AllTasks");
+        const allTasks = JSON.parse(localStorage.getItem("All Tasks"));
         const today = new Date();
         const nextWeekStart = today;
         const nextWeekEnd = addDays(today, 7);

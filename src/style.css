@@ -1,0 +1,9 @@
+#head{
+    display: flex;
+    justify-content: center;
+}
+
+#layout{
+    display:flex;
+    flex-direction: row;
+}

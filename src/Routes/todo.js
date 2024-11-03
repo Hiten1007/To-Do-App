@@ -18,13 +18,33 @@ export const todoapp = (() => {
         }
     }
 
-    function createTodo(title, description, dueDate, priority, notes) {
-        const newTodo = new Task(title, description, dueDate, priority, notes);
-        if (Project.getActiveProject() !== "AllTasks") {
-            Project.getProjects().get(Project.getActiveProject()).push(newTodo);
-        }
-        Project.getProjects().get("AllTasks").push(newTodo);   
-        displayTasks(); 
+    function createTodo() {
+
+        const pr = new Promise(function(resolve, reject){
+            if(!validateToDo()){
+                const err = new Error("Task Details Incomplete");
+                reject(err);
+            } else if(!Project.storageAvailable("localStorage")){
+                const err = new Error("Local Storage not available");
+            } else {
+                const title = document.querySelector("#title").value;
+                const description = document.querySelector("#description").value ? document.querySelector("#description").value : "";
+                const dueDate = time.formatTime(document.querySelector("#date").value);
+                const selectedPriority = document.querySelector('input[name="priority"]:checked');
+                const priority = selectedPriority ? selectedPriority.value : "low";
+                const notes = document.querySelector("#notes").value ? document.querySelector("#notes").value  : "";
+
+                const task = new Task(title, description, dueDate, priority, notes);
+                const activeproject = Project.getActiveProject();
+                localStorage.setItem(`${activeproject}`, JSON.stringify(JSON.parse(localStorage.getItem(`${activeproject}`)).push(task)));
+                if(activeproject !== "All Tasks"){
+                    localStorage.setItem(`${activeproject}`, localStorage.getItem(`${activeproject}`).push(JSON.stringify(task)));
+                }
+                resolve(activeproject);
+            }
+        });
+
+       return pr;
     }
     
     function createTaskElement(task) {
@@ -63,6 +83,8 @@ export const todoapp = (() => {
             task.toggleComplete();
         });
 
+        newToDo.classList.add("tasks");
+
         return newToDo;
     }
 
@@ -74,10 +96,10 @@ export const todoapp = (() => {
         });
     }
 
-    const displayTasks = () => {
-        const activeProject = Project.getActiveProject();
-        const tasksContainer = document.querySelector("#display"); 
-    
+    const displayTasks = (activeProject) => {
+        const displayBox = document.querySelector("#display");
+        displayBox.textContent = "";
+        const tasksContainer = document.createElement("div"); 
         tasksContainer.textContent = ''; 
     
         if (["Today", "Next 7 Days"].includes(activeProject)) {
@@ -89,11 +111,20 @@ export const todoapp = (() => {
                 next7Days ? displayAll(next7Days) : tasksContainer.textContent = 'No upcoming tasks';
             }
         } else {
-            const projectTasks = Project.getProjects().get(Project.getActiveProject());
+            const projectTasks = JSON.parse(localStorage.getItem(activeProject));
             initial_page.defaultProjectDisplay();
-            displayAll(projectTasks);
+            projectTasks ? displayAll(projectTasks) : tasksContainer.textContent = 'No tasks';
         }
+        displayBox.appendChild(tasksContainer);
     };
+
+    function validateToDo() {
+        const title = document.querySelector("#title").value;
+        const dueDate = time.formatTime(document.querySelector("#date").value);
+        
+        return title &&  dueDate;
+    }
+
 
     return { createTodo, displayTasks };
 })();

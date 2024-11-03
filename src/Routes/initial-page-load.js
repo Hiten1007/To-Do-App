@@ -2,28 +2,53 @@ import { todoapp } from "./todo.js";
 import { Project } from "./projects.js";
 import { time } from "./time.js";
 import { secondsInHour } from "date-fns/constants";
+import { add } from "date-fns/fp";
 
 export const initial_page = (() => {
     function createDisplay() {
         const mainBox = document.querySelector("#mainContent");
-
-        mainBox.appendChild(createHeader("My To-Do", "h1"));
+        const header = createHeader("My To-Do", "h1");
+        header.setAttribute("id", "head");
+        mainBox.appendChild(header);
 
         const layout = document.createElement("div");
+        layout.setAttribute("id", "layout");
 
         const sideBar = createSidebar();
         layout.appendChild(sideBar);
 
         const displayBox = document.createElement("div");
         displayBox.setAttribute("id", "display");
+
         layout.appendChild(displayBox);
 
         mainBox.appendChild(layout);
         
-        ["All Tasks", "Today", "Next 7 Days"].forEach(projectName => {
-            Project.createProject(projectName, "defaults");
-            secondsInHour
-        });
+        const defaults = document.querySelector("#defaults");
+
+        const all = createHeader("All Tasks", "h3");
+        all.setAttribute("id", "AllTasks");
+        defaults.appendChild(all);
+
+        const today = createHeader("Today","h3");
+        today.setAttribute("id", "today");
+        defaults.appendChild(today);
+
+        const next7 = createHeader("Next 7 Days", "h3");
+        next7.setAttribute("id", "next7");
+        defaults.appendChild(next7);
+
+        if(!localStorage.getItem("All Tasks")){
+            populateStorage();
+        } else{
+            todoapp.displayTasks("All Tasks");
+        }
+        
+    }
+
+    function populateStorage(){
+        localStorage.setItem("All Tasks", JSON.stringify([]));
+        todoapp.displayTasks();
     }
 
     function createSidebar() {
@@ -44,14 +69,13 @@ export const initial_page = (() => {
         const projectBox = document.createElement("div");
         projectBox.setAttribute("id", "projectBox");
 
-        console.log("Project Box Created:", projectBox); 
-
         projectBox.appendChild(createHeader("Projects", "h2"));
 
         const addProjectB = document.createElement("div");
+        addProjectB.setAttribute("id", "PAdd");
         const addProjectButton = createButton("+");
+        addProjectButton.setAttribute("id", "addProjectButton");
         
-        addProjectButton.addEventListener("click", addProject);
         addProjectB.appendChild(addProjectButton);
         
         const addProjectText = document.createElement("div");
@@ -60,29 +84,22 @@ export const initial_page = (() => {
 
         projectBox.appendChild(addProjectB);
 
+        addProjectButton.addEventListener("click", () => {
+            addProjectB.style.display = "none";
+            addProject();
+        });
+
         return projectBox;
-    }
-
-    function createHeader(text, size){
-        const header = document.createElement(size);
-        header.textContent = text;
-        return header;
-    }
-
-    function createButton(text){
-        const button = document.createElement("button");
-        button.textContent = text;
-        return button;
     }
 
     function defaultProjectDisplay(){
         const displayBox = document.querySelector("#display");
         const addToDo = document.createElement("div");
+        addToDo.setAttribute("id", "addToDo");
 
         const addTaskButton = createButton("+");
-        addTaskButton.addEventListener("click", () =>{
-            addTask();
-        });
+        addTaskButton.setAttribute("id", "addTaskB");
+       
         addToDo.appendChild(addTaskButton);
         
         const addTaskText = document.createElement("div");
@@ -95,6 +112,7 @@ export const initial_page = (() => {
     function addProject(){
         const projectBox = document.querySelector("#projectBox");
         const addBox = document.createElement("div");
+        addBox.setAttribute("id", "addPBox");
 
         const addBoxInput = document.createElement("input");
         addBoxInput.setAttribute("type", "text");
@@ -105,13 +123,24 @@ export const initial_page = (() => {
         const buttons = document.createElement("div");
 
         const submitButton = createButton("Add");
-        submitButton.addEventListener("click", (event) => {
-            event.preventDefault();
-            if (addBoxInput.value) {
-                Project.createProject(addBoxInput.value, "projectBox");
-                projectBox.removeChild(addBox);
-            }
+        submitButton.setAttribute("id", "submitP");
+
+
+        submitButton.addEventListener("click", () =>{
+            Project.createProject()
+            .then((project) => {
+                Project.createProjectDom(project);
+                todoapp.displayTasks(project);
+            })
+            .catch(function(err){//look to display it somewhere
+                
+                console.log(err);
+            });
+
+            document.querySelector("#PAdd").style.display = "block";  
+            projectBox.removeChild(addBox); 
         });
+        
         buttons.appendChild(submitButton);
 
         const cancelButton = createButton("Cancel");
@@ -125,11 +154,13 @@ export const initial_page = (() => {
         projectBox.appendChild(addBox);
     }
 
-    function addTask(){
-        const displayBox = document.querySelector("#display"); 
-        const taskBox = document.createElement("form");
-        taskBox.setAttribute("method", "get");
     
+
+    function addTask(){
+        const dlg = document.createElement("dialog");
+        const taskBox = document.createElement("form");
+        taskBox.setAttribute("method", "dialog");
+      
         const title = document.createElement("div");
         title.appendChild(createLabel("title", "Title"));
         const titleInput = createInput("text", "title", "title");
@@ -160,39 +191,25 @@ export const initial_page = (() => {
         taskBox.appendChild(notes);
     
         const add = createButton("Add");
-        add.addEventListener("click", (event) => {
-            event.preventDefault(); // Prevent the default form submission
+        add.setAttribute("id", "addtoStorage");
+        
+        document.querySelector("dialog #addtoStorage").addEventListener("click", () => {
+            todoapp.createTodo()
+            .then(function(){
+                const form = document.querySelector("form");
+                form.reset();
+                document.querySelector("dialog").close();
+                todoapp.displayTasks();
+               
+            })
+            .catch(function(err){
+
+            });
             
-            getTodoInputValues(); // Get the input values
-    
-            // Check if taskBox is a child of displayBox before removing
-            if (displayBox.contains(taskBox)) {
-                displayBox.removeChild(taskBox); // Safely remove taskBox
-            } else {
-                console.warn("taskBox is not a child of displayBox");
-            }
-    
-            taskBox.reset(); // Reset the form fields
         });
-    
+
         taskBox.appendChild(add);
-        displayBox.appendChild(taskBox);
-    }
-
-    function createInput(type, id, names){        
-        const input = document.createElement("input");
-        input.setAttribute("type", type);
-        input.setAttribute("id", id);
-        input.setAttribute("name", names);
-
-        return input;
-    }
-
-    function createLabel(forText, text){
-        const label = document.createElement("label");
-        label.setAttribute("for", forText);
-        label.textContent = text;
-        return label;
+        dlg.appendChild(dialog);
     }
 
     function createPriorityRadioButtons() {
@@ -217,21 +234,47 @@ export const initial_page = (() => {
         return container;
     }
 
-    function getTodoInputValues() {
-        const title = document.querySelector("#title").value;
-        const description = document.querySelector("#description").value;
-        const dueDate = time.formatTime(document.querySelector("#date").value);
+    function createInput(type, id, names){        
+        const input = document.createElement("input");
+        input.setAttribute("type", type);
+        input.setAttribute("id", id);
+        input.setAttribute("name", names);
 
-        const selectedPriority = document.querySelector('input[name="priority"]:checked');
-        const priority = selectedPriority ? selectedPriority.value : "low";
-
-        const notes = document.querySelector("#notes").value;
- 
-        if (title && description && dueDate && priority && notes) {
-            todoapp.createTodo(title, description, dueDate, priority, notes);
-        }
-       
+        return input;
     }
 
-    return { createDisplay, defaultProjectDisplay };
+    function createLabel(forText, text){
+        const label = document.createElement("label");
+        label.setAttribute("for", forText);
+        label.textContent = text;
+        return label;
+    }
+    
+    function createHeader(text, size){
+        const header = document.createElement(size);
+        header.textContent = text;
+        return header;
+    }
+
+    function createButton(text){
+        const button = document.createElement("button");
+        button.textContent = text;
+        return button;
+    }
+
+    //make it later
+    function createErrorBox(err){
+        const popup = document.createElement("div");
+        const heading = createHeader("Error", "h1");
+        popup.appendChild(heading);
+
+        const error = document.createElement("div");
+        error.textContent = err;
+        popup.appendChild(error);
+
+        return popup;
+    }
+
+
+    return { createDisplay, defaultProjectDisplay, addProject, addTask, createErrorBox };
 })();

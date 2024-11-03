@@ -2,64 +2,79 @@ import { todoapp } from "./todo";
 
 export const Project = (() => {
 
-    const projects = new Map();
-    projects.set("AllTasks", []);
-    let ActiveProject = "AllTasks";
-
-    function createProject(title, box){
-        let text = "#" + box;
-        const projectBox = document.querySelector(text);
-    
-        if (!projectBox) {
-            console.error(`Project box with ID "${box}" not found.`);
-            return null; 
-        }
-    
-        const project = document.createElement("div");
-        const projectTitle = document.createElement("h1");
-        projectTitle.textContent = title;
-        project.appendChild(projectTitle);
-    
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => {
-            projectBox.removeChild(project);
-            projects.delete(title);
-            if (ActiveProject === title) {
-                ActiveProject = "AllTasks"; 
-                todoapp.displayTasks();
+  let activeProject = "All Tasks";
+  function createProject(){
+        const pr = new Promise(function(resolve, reject){
+            if(!validateProject()){
+                const errMessage = new Error("Title not written");
+                reject(errMessage);
+            } else if (!storageAvailable("localStorage")) {
+                const errMessage = new Error("LocalStorage Not Available");
+                reject(errMessage);
+            } else {
+              const projectName = document.querySelector("#nameP").value.trim();
+              localStorage.setItem(`${projectName}`, JSON.stringify([]));
+              resolve(projectName);
             }
         });
-        project.appendChild(deleteButton);
-    
-        projectTitle.addEventListener("click", () => {
-            setActiveProject(title);
-            todoapp.displayTasks(); 
+
+        return pr;
+    }
+
+    function validateProject(){
+       const projectName = document.querySelector("#nameP").value.trim();
+       return projectName !== "" && !localStorage.getItem(projectName);
+    }
+    function storageAvailable(type) {
+        let storage;
+        try {
+          storage = window[type];
+          const x = "__storage_test__";
+          storage.setItem(x, x);
+          storage.removeItem(x);
+          return true;
+        } catch (e) {
+          return (
+            e instanceof DOMException &&
+            e.name === "QuotaExceededError" &&
+            // acknowledge QuotaExceededError only if there's something already stored
+            storage &&
+            storage.length !== 0
+          );
+        }
+      }
+
+      function createProjectDom(project){
+        const projectBigBox = document.querySelector("#projectBox")
+        
+        const projectB = document.createElement("div");
+
+        const title = document.createElement("h3");
+        title.textContent = project;
+        projectB.appendChild(title);
+
+        const deleteB = document.createElement("button");
+        deleteB.textContent = "delete";
+        deleteB.addEventListener("click", () => {
+          projectBigBox.removeChild(projectB);
         });
-    
-        project.setAttribute("id", title.replace(/\s+/g, '_'));
-        addProjects(title);
-    
-        projectBox.appendChild(project);
-        return project;
-    }
+        projectB.appendChild(deleteB);
+        
+        projectB.addEventListener("click", () =>{
+          todoapp.displayTasks(project);
+          Project.setActiveProject(project);
+        })
 
-    function getActiveProject(){
-        return ActiveProject;
-    }
+        projectBigBox.appendChild(projectB);
+      }
 
-    function setActiveProject(project){
-        ActiveProject = project;
-    }
+      function getActiveProject(){
+        return activeProject;
+      }
 
-    function addProjects(title){
-        projects.set(`${title}`, []);
-    }
-
-    function getProjects(){
-        return projects;
-    }
-
-    return {createProject, setActiveProject, getActiveProject, getProjects, addProjects};
-
+      function setActiveProject(project){
+        activeProject = project;
+      }
+      return {createProject, getActiveProject, setActiveProject, createProjectDom, storageAvailable};
+      
 })();
