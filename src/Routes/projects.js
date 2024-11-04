@@ -55,14 +55,22 @@ export const Project = (() => {
 
         const deleteB = document.createElement("button");
         deleteB.textContent = "delete";
-        deleteB.addEventListener("click", () => {
+        deleteB.addEventListener("click", (e) => {
+          e.stopPropagation(); // Prevent triggering displayTasks when deleting
+  
+          // Remove project element from DOM
           projectBigBox.removeChild(projectB);
-        });
+  
+          // Remove project from localStorage by its title key
+          localStorage.removeItem(project);
+          todoapp.displayTasks("All Tasks");
+      });
+      
         projectB.appendChild(deleteB);
         
         projectB.addEventListener("click", () =>{
-          todoapp.displayTasks(project);
           Project.setActiveProject(project);
+          todoapp.displayTasks(project);
         })
 
         projectBigBox.appendChild(projectB);

@@ -21,26 +21,42 @@ export const todoapp = (() => {
     function createTodo() {
 
         const pr = new Promise(function(resolve, reject){
-            if(!validateToDo()){
-                const err = new Error("Task Details Incomplete");
-                reject(err);
-            } else if(!Project.storageAvailable("localStorage")){
-                const err = new Error("Local Storage not available");
+            if (!validateToDo()) {
+                reject(new Error("Task Details Incomplete"));
+            } else if (!Project.storageAvailable("localStorage")) {
+                reject(new Error("Local Storage not available"));
             } else {
                 const title = document.querySelector("#title").value;
-                const description = document.querySelector("#description").value ? document.querySelector("#description").value : "";
+                const description = document.querySelector("#description").value || "";
                 const dueDate = time.formatTime(document.querySelector("#date").value);
                 const selectedPriority = document.querySelector('input[name="priority"]:checked');
                 const priority = selectedPriority ? selectedPriority.value : "low";
-                const notes = document.querySelector("#notes").value ? document.querySelector("#notes").value  : "";
-
+                const notes = document.querySelector("#notes").value || "";
+    
                 const task = new Task(title, description, dueDate, priority, notes);
-                const activeproject = Project.getActiveProject();
-                localStorage.setItem(`${activeproject}`, JSON.stringify(JSON.parse(localStorage.getItem(`${activeproject}`)).push(task)));
-                if(activeproject !== "All Tasks"){
-                    localStorage.setItem(`${activeproject}`, localStorage.getItem(`${activeproject}`).push(JSON.stringify(task)));
+                const activeProject = Project.getActiveProject();
+    
+                // Retrieve and validate projectTasks as an array
+                let projectTasks = JSON.parse(localStorage.getItem(activeProject));
+                if (!Array.isArray(projectTasks)) {
+                    projectTasks = []; // Default to an empty array if it's not an array
                 }
-                resolve(activeproject);
+    
+                // Add the new task to the array and update localStorage
+                projectTasks.push(task);
+                localStorage.setItem(activeProject, JSON.stringify(projectTasks));
+    
+                // Also add to 'All Tasks' if this is not the 'All Tasks' project
+                if (activeProject !== "All Tasks") {
+                    let allTasks = JSON.parse(localStorage.getItem("All Tasks"));
+                    if (!Array.isArray(allTasks)) {
+                        allTasks = []; // Default to an empty array if it's not an array
+                    }
+                    allTasks.push(task);
+                    localStorage.setItem("All Tasks", JSON.stringify(allTasks));
+                }
+    
+                resolve(activeProject);
             }
         });
 
@@ -90,6 +106,7 @@ export const todoapp = (() => {
 
     function displayAll(tasks) {
         const displayBox = document.querySelector("#display");
+        console.log(Array.isArray(tasks));
         tasks.forEach((task) => {
             const taskElement = createTaskElement(task);
             displayBox.appendChild(taskElement);
@@ -102,7 +119,7 @@ export const todoapp = (() => {
         const tasksContainer = document.createElement("div"); 
         tasksContainer.textContent = ''; 
     
-        if (["Today", "Next 7 Days"].includes(activeProject)) {
+        
             if (activeProject === "Today") {
                 const todayTasks = time.getTodayTasks();
                 todayTasks ? displayAll(todayTasks) : tasksContainer.textContent = 'No tasks today';
@@ -110,10 +127,11 @@ export const todoapp = (() => {
                 const next7Days = time.getNext7Days();
                 next7Days ? displayAll(next7Days) : tasksContainer.textContent = 'No upcoming tasks';
             }
-        } else {
+        else {
             const projectTasks = JSON.parse(localStorage.getItem(activeProject));
+            
             initial_page.defaultProjectDisplay();
-            projectTasks ? displayAll(projectTasks) : tasksContainer.textContent = 'No tasks';
+            projectTasks.length !== 0 && projectTasks? displayAll(projectTasks) : tasksContainer.textContent = 'No tasks';
         }
         displayBox.appendChild(tasksContainer);
     };
@@ -128,3 +146,5 @@ export const todoapp = (() => {
 
     return { createTodo, displayTasks };
 })();
+// chcek if active project is being changed in docs
+// we are checking if task are adding to our displaybox

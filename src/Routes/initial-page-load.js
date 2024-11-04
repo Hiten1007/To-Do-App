@@ -44,11 +44,26 @@ export const initial_page = (() => {
             todoapp.displayTasks("All Tasks");
         }
         
+        all.addEventListener("click", () =>{
+            Project.setActiveProject("All Tasks");
+            todoapp.displayTasks('All Tasks');
+          
+        });
+        
+        today.addEventListener("click", () =>{
+            Project.setActiveProject('Today');
+            todoapp.displayTasks("Today");
+        });
+
+        next7.addEventListener("click", () =>{
+            Project.setActiveProject('Next 7 Days');
+            todoapp.displayTasks("Next 7 Days"); 
+        });
     }
 
     function populateStorage(){
         localStorage.setItem("All Tasks", JSON.stringify([]));
-        todoapp.displayTasks();
+        todoapp.displayTasks("All Tasks");
     }
 
     function createSidebar() {
@@ -107,6 +122,10 @@ export const initial_page = (() => {
         addToDo.appendChild(addTaskText);
 
         displayBox.appendChild(addToDo);
+
+        addTaskButton.addEventListener("click", () => {
+            document.querySelector("dialog").showModal();
+        })
     }
 
     function addProject(){
@@ -129,8 +148,9 @@ export const initial_page = (() => {
         submitButton.addEventListener("click", () =>{
             Project.createProject()
             .then((project) => {
+                Project.setActiveProject(project);
                 Project.createProjectDom(project);
-                todoapp.displayTasks(project);
+                return todoapp.displayTasks(project);
             })
             .catch(function(err){//look to display it somewhere
                 
@@ -152,19 +172,21 @@ export const initial_page = (() => {
         addBox.appendChild(buttons);
 
         projectBox.appendChild(addBox);
+
+       
     }
 
     
 
-    function addTask(){
+    function addTask(){        
         const dlg = document.createElement("dialog");
         const taskBox = document.createElement("form");
         taskBox.setAttribute("method", "dialog");
-      
+    
         const title = document.createElement("div");
         title.appendChild(createLabel("title", "Title"));
         const titleInput = createInput("text", "title", "title");
-        titleInput.setAttribute("required", true);
+       
         title.appendChild(titleInput);
         taskBox.appendChild(title);
     
@@ -186,30 +208,31 @@ export const initial_page = (() => {
         const notes = document.createElement("div");
         notes.appendChild(createLabel("notes", "Notes"));
         const notesInput = createInput("text", "notes", "notes");
-        notesInput.setAttribute("required", true);
+       
         notes.appendChild(notesInput);
         taskBox.appendChild(notes);
     
         const add = createButton("Add");
         add.setAttribute("id", "addtoStorage");
-        
-        document.querySelector("dialog #addtoStorage").addEventListener("click", () => {
+    
+        // Add the event listener directly to the `add` button
+        add.addEventListener("click", () => {
             todoapp.createTodo()
-            .then(function(){
-                const form = document.querySelector("form");
-                form.reset();
-                document.querySelector("dialog").close();
-                todoapp.displayTasks();
-               
+            .then(function(project){
+                taskBox.reset();  // Reset the form after successful addition
+                dlg.close();      // Close the dialog
+                todoapp.displayTasks(project);
             })
             .catch(function(err){
-
+                console.error("Error creating todo:", err);
             });
-            
         });
-
+    
         taskBox.appendChild(add);
-        dlg.appendChild(dialog);
+        dlg.appendChild(taskBox);
+        document.body.appendChild(dlg); // Append the dialog to the body
+    
+       
     }
 
     function createPriorityRadioButtons() {
