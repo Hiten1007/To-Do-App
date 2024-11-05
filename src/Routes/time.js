@@ -9,7 +9,7 @@ export const time = (() => {
     function getTodayTasks() {
         const allTasks = JSON.parse(localStorage.getItem("All Tasks"));
         const today = formatTime(new Date());
-        return allTasks !== null ? allTasks.filter(todo => todo.date === today) : null;
+        return allTasks !== null ? allTasks.filter(todo => todo.dueDate === today) : null;
     }
 
     function getNext7Days() {
@@ -19,7 +19,7 @@ export const time = (() => {
         const nextWeekEnd = addDays(today, 7);
 
         return allTasks.filter(todo => {
-            const todoDate = new Date(todo.date);
+            const todoDate = new Date(todo.dueDate);
             return isWithinInterval(todoDate, { start: nextWeekStart, end: nextWeekEnd });
         });
     }

@@ -4,17 +4,12 @@ import { todoapp } from "./Routes/todo";
 import './style.css';
 
 const start = (() => {
-    function addAddEvents(){
-
-        
-
-       
-
+    function init(){
+        initial_page.addTask();
+        initial_page.createDisplay();    
     }
-    return {addAddEvents};
+    return { init };
+    
 })();
 
-initial_page.addTask();
-initial_page.createDisplay();
-
-start.addAddEvents();
+start.init();

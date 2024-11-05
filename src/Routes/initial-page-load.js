@@ -38,6 +38,8 @@ export const initial_page = (() => {
         next7.setAttribute("id", "next7");
         defaults.appendChild(next7);
 
+        Project.displayAllProjects();
+
         if(!localStorage.getItem("All Tasks")){
             populateStorage();
         } else{
@@ -219,8 +221,8 @@ export const initial_page = (() => {
         add.addEventListener("click", () => {
             todoapp.createTodo()
             .then(function(project){
-                taskBox.reset();  // Reset the form after successful addition
-                dlg.close();      // Close the dialog
+                taskBox.reset(); 
+                dlg.close();      
                 todoapp.displayTasks(project);
             })
             .catch(function(err){
@@ -230,7 +232,7 @@ export const initial_page = (() => {
     
         taskBox.appendChild(add);
         dlg.appendChild(taskBox);
-        document.body.appendChild(dlg); // Append the dialog to the body
+        document.body.appendChild(dlg); 
     
        
     }

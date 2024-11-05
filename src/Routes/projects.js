@@ -62,7 +62,14 @@ export const Project = (() => {
           projectBigBox.removeChild(projectB);
   
           // Remove project from localStorage by its title key
+          const tasks = JSON.parse(localStorage.getItem(project));
+          let allTasks = JSON.parse(localStorage.getItem("All Tasks"));
+          allTasks = allTasks.filter(todo => 
+            !tasks.some(projectTask => projectTask.title === todo.title && projectTask.dueDate === todo.dueDate)
+          );
           localStorage.removeItem(project);
+          
+          localStorage.setItem("All Tasks", JSON.stringify(allTasks));
           todoapp.displayTasks("All Tasks");
       });
       
@@ -76,6 +83,11 @@ export const Project = (() => {
         projectBigBox.appendChild(projectB);
       }
 
+      function displayAllProjects(){
+        const projects = Object.keys(localStorage).filter(key => key !== "All Tasks");
+        projects.forEach(project => createProjectDom(project));
+      }
+
       function getActiveProject(){
         return activeProject;
       }
@@ -83,6 +95,6 @@ export const Project = (() => {
       function setActiveProject(project){
         activeProject = project;
       }
-      return {createProject, getActiveProject, setActiveProject, createProjectDom, storageAvailable};
+      return {createProject, getActiveProject, setActiveProject, createProjectDom, storageAvailable, displayAllProjects};
       
 })();

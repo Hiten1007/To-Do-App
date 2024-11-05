@@ -4,13 +4,14 @@ import { initial_page } from "./initial-page-load";
 
 export const todoapp = (() => {
     class Task {
-        constructor(title, description, dueDate, priority, notes) {
+        constructor(title, description, dueDate, priority, notes, project) {
             this.title = title;
             this.description = description;
             this.dueDate = dueDate;
             this.priority = priority;
             this.notes = notes;
             this.completed = false;
+            this.project = project;
         }
 
         toggleComplete() {
@@ -33,8 +34,9 @@ export const todoapp = (() => {
                 const priority = selectedPriority ? selectedPriority.value : "low";
                 const notes = document.querySelector("#notes").value || "";
     
-                const task = new Task(title, description, dueDate, priority, notes);
                 const activeProject = Project.getActiveProject();
+                const task = new Task(title, description, dueDate, priority, notes, activeProject);
+               
     
                 // Retrieve and validate projectTasks as an array
                 let projectTasks = JSON.parse(localStorage.getItem(activeProject));
@@ -76,7 +78,7 @@ export const todoapp = (() => {
         newToDo.appendChild(descriptionBox);
 
         const dueDateBox = document.createElement("div");
-        dueDateBox.textContent = task.date;
+        dueDateBox.textContent = task.dueDate;
         dueDateBox.classList.add("date");
         newToDo.appendChild(dueDateBox);
 
@@ -92,14 +94,52 @@ export const todoapp = (() => {
         checkBox.setAttribute("type", "checkbox");
         checkBox.setAttribute("class", "mycheckbox");
         checkBox.setAttribute("name", "mycheckbox");
+        if(task.completed === true){
+            checkBox.setAttribute("checked", "true");
+        }
         newToDo.appendChild(checkBox);
 
         // Checkbox change event
         checkBox.addEventListener("change", () => {
-            task.toggleComplete();
+            let tasks = JSON.parse(localStorage.getItem(task.project));    
+            console.log(task);
+            console.log(tasks);   
+           
+            
+            tasks = tasks.filter(todo => todo.dueDate !== task.dueDate && todo.title !== task.title);
+            task.completed = !task.completed;     
+            tasks.push(task);
+            localStorage.setItem(task.project, JSON.stringify(tasks));
+
+            if(tasks.project !== "All Tasks"){
+                let tasks1 = JSON.parse(localStorage.getItem("All Tasks"));   
+                task.completed = !task.completed; 
+                tasks1 = tasks1.filter(todo => todo.dueDate !== task.dueDate && todo.title !== task.title);
+                task.completed = !task.completed;
+                tasks1.push(task);
+                localStorage.setItem("All Tasks", JSON.stringify(tasks1));
+            }
+            console.log("sucess");
         });
 
         newToDo.classList.add("tasks");
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "delete";
+        deleteButton.classList.add("deletetodo");
+        deleteButton.addEventListener("click", () => {
+            let tasks = JSON.parse(localStorage.getItem(task.project));
+            tasks = tasks.filter(todo => todo.dueDate !== task.dueDate && todo.title !== task.title);
+            localStorage.setItem(task.project, JSON.stringify(tasks));
+            if(task.project !== "All Tasks"){
+                let tasks1 = JSON.parse(localStorage.getItem("All Tasks"));
+                tasks1 = tasks1.filter(todo => todo.dueDate !== task.dueDate && todo.title !== task.title);
+                localStorage.setItem("All Tasks", JSON.stringify(tasks1));
+            }
+            
+            displayTasks(Project.getActiveProject());
+        });
+        newToDo.appendChild(deleteButton);
 
         return newToDo;
     }
@@ -108,6 +148,7 @@ export const todoapp = (() => {
         const displayBox = document.querySelector("#display");
         console.log(Array.isArray(tasks));
         tasks.forEach((task) => {
+           
             const taskElement = createTaskElement(task);
             displayBox.appendChild(taskElement);
         });
@@ -122,10 +163,10 @@ export const todoapp = (() => {
         
             if (activeProject === "Today") {
                 const todayTasks = time.getTodayTasks();
-                todayTasks ? displayAll(todayTasks) : tasksContainer.textContent = 'No tasks today';
+                todayTasks.length !== 0 && todayTasks ? displayAll(todayTasks) : tasksContainer.textContent = 'No tasks today';
             } else if (activeProject === "Next 7 Days") {
                 const next7Days = time.getNext7Days();
-                next7Days ? displayAll(next7Days) : tasksContainer.textContent = 'No upcoming tasks';
+                next7Days.length !== 0 && next7Days ? displayAll(next7Days) : tasksContainer.textContent = 'No upcoming tasks';
             }
         else {
             const projectTasks = JSON.parse(localStorage.getItem(activeProject));
@@ -146,5 +187,3 @@ export const todoapp = (() => {
 
     return { createTodo, displayTasks };
 })();
-// chcek if active project is being changed in docs
-// we are checking if task are adding to our displaybox
