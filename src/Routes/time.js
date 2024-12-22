@@ -1,5 +1,4 @@
 import { format, isWithinInterval, addDays } from "date-fns";
-import { Project } from "./projects";
 
 export const time = (() => {
     function formatTime(date) {

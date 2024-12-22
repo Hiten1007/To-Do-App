@@ -54,7 +54,8 @@ export const Project = (() => {
         projectB.appendChild(title);
 
         const deleteB = document.createElement("button");
-        deleteB.textContent = "delete";
+        deleteB.textContent = "Delete";
+        deleteB.classList.add("deleteB");
         deleteB.addEventListener("click", (e) => {
           e.stopPropagation(); // Prevent triggering displayTasks when deleting
   

@@ -69,27 +69,39 @@ export const todoapp = (() => {
         const newToDo = document.createElement("div");
         newToDo.setAttribute("id", `task-${task.title.replace(/\s+/g, '_')}`);
 
+        const info = document.createElement("div");
+
+        const otherinfo = document.createElement("div");
+        otherinfo.classList.add("otherinfo");
+
         const titleBox = document.createElement("h2");
         titleBox.textContent = task.title;
-        newToDo.appendChild(titleBox);
+        titleBox.style.fontWeight = "300";
+        info.appendChild(titleBox);
 
         const descriptionBox = document.createElement("p");
-        descriptionBox.textContent = task.description;
-        newToDo.appendChild(descriptionBox);
+        descriptionBox.textContent = "Description: " + task.description;
+        info.appendChild(descriptionBox);
 
         const dueDateBox = document.createElement("div");
-        dueDateBox.textContent = task.dueDate;
+        dueDateBox.textContent = "Due Date : " + task.dueDate;
         dueDateBox.classList.add("date");
-        newToDo.appendChild(dueDateBox);
+        otherinfo.appendChild(dueDateBox);
 
         const priorityBox = document.createElement("div");
         priorityBox.textContent = "Priority: " + task.priority;
-        newToDo.appendChild(priorityBox);
+        otherinfo.appendChild(priorityBox);
 
         const notes = document.createElement("div");
-        notes.textContent = task.notes;
-        newToDo.appendChild(notes);
+        notes.textContent ="Notes: " + task.notes;
+        info.appendChild(notes);
 
+        const checkBoxDiv = document.createElement("div");
+        checkBoxDiv.style.display = "flex";
+        const checkBoxText = document.createElement("div");
+        checkBoxText.textContent = "Completed ? ";
+        checkBoxDiv.appendChild(checkBoxText);
+        
         const checkBox = document.createElement("input");
         checkBox.setAttribute("type", "checkbox");
         checkBox.setAttribute("class", "mycheckbox");
@@ -97,7 +109,9 @@ export const todoapp = (() => {
         if(task.completed === true){
             checkBox.setAttribute("checked", "true");
         }
-        newToDo.appendChild(checkBox);
+        checkBoxDiv.appendChild(checkBox);
+
+        otherinfo.appendChild(checkBoxDiv);
 
         // Checkbox change event
         checkBox.addEventListener("change", () => {
@@ -125,7 +139,7 @@ export const todoapp = (() => {
         newToDo.classList.add("tasks");
 
         const deleteButton = document.createElement("button");
-        deleteButton.textContent = "delete";
+        deleteButton.textContent = "Delete";
         deleteButton.classList.add("deletetodo");
         deleteButton.addEventListener("click", () => {
             let tasks = JSON.parse(localStorage.getItem(task.project));
@@ -139,8 +153,11 @@ export const todoapp = (() => {
             
             displayTasks(Project.getActiveProject());
         });
-        newToDo.appendChild(deleteButton);
+        otherinfo.appendChild(deleteButton);
 
+        newToDo.appendChild(info);
+        newToDo.appendChild(otherinfo);
+        
         return newToDo;
     }
 
@@ -157,6 +174,12 @@ export const todoapp = (() => {
     const displayTasks = (activeProject) => {
         const displayBox = document.querySelector("#display");
         displayBox.textContent = "";
+
+        const active = document.createElement("div");
+        active.setAttribute("id", "activeP");
+        active.textContent = Project.getActiveProject();
+        displayBox.appendChild(active);
+
         const tasksContainer = document.createElement("div"); 
         tasksContainer.textContent = ''; 
     
