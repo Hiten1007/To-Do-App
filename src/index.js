@@ -1,5 +1,5 @@
 import { initial_page } from "./Routes/initial-page-load";
-import './style.css';
+import './styles.css';
 
 const start = (() => {
     function init(){

@@ -1,0 +1,145 @@
+#head{
+    display: flex;
+    justify-content: center;
+    color: rgb(42, 189, 103);
+}
+
+#header{
+    display: flex;
+    justify-content: center;
+}
+
+#headimg{
+    width:50px;
+    height:45px;
+    margin:20px 10px;
+}
+#layout{
+    display:flex;
+    flex-direction: row;
+    flex-grow: 2;
+}
+
+#sidebar{
+    margin:10px 30px;
+    width:20rem;
+}
+
+#PAdd{
+    display:flex;
+    justify-content: space-between;
+}
+
+.images{
+    height:30px;
+    width:30px;
+    margin:15px 0px 0px 0px;
+}
+
+#projectBox, #addPBox{
+    margin:20px 0px;
+}
+
+#cButton{
+    color:white;
+    background-color: red;
+    border-radius: 1rem;
+    padding:0.5rem;
+}
+
+
+#submitP{
+    color:white;
+    background-color: green;
+    border-radius: 1rem;
+    padding:0.5rem;
+    width:3.5rem;
+}
+
+#customBs{
+    display: flex;
+}
+
+#activeP{
+    color:white;
+    background-color:rgb(42, 189, 103);
+    margin:10px 0px;
+    font-size: xx-large;
+    padding:30px;
+}
+
+#display{
+    width:100%;
+    margin:2rem;
+}
+
+#addToDo{
+    display: flex;
+    width: 20%;
+    justify-content: space-between;
+    margin: 1rem 0rem;
+}
+
+#addTaskB, #addProjectButton{
+    background-color: white;
+    border-color: black;
+    border-radius: 10px;
+}
+
+form{
+    padding:20px;
+}
+
+dialog{
+    border-color: white;
+    border-radius: 3px;
+}
+
+.inputs{
+    display: flex;
+    flex-direction: column;
+    margin:1rem;
+}
+
+#addtoStorage{
+    margin-left: 4.5rem;
+    padding:0.25rem 1.5rem;
+    background-color: white;
+    border-radius: 2rem;
+    background-color: rgb(42, 189, 103);
+    color:white;
+    border-color: rgb(42, 189, 103);
+}
+
+.tasks{
+    display: flex;
+    border-width: 2px;
+    border-color: black;
+    border-style: solid;
+    margin: 2rem 0rem;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.otherinfo{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.deletetodo{
+    background-color: red;
+    border-color: red;
+    border-radius: 1rem;
+    padding:0.25rem 1rem;
+    color: white;
+}
+
+.deleteB{
+    background-color: red;
+    border-radius: 1rem;
+    padding:0.25rem 1rem;
+    color: white;
+    border-color: red;
+
+}
